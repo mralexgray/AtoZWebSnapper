@@ -15,12 +15,15 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #import <Cocoa/Cocoa.h>
-
 #import <WebKit/WebKit.h>
 
 
-@interface AtoZWebSnapperWindowController : NSWindowController {
+@class AtoZWebSnapper;
+@interface AtoZWebSnapperWindowController : NSWindowController
+{
     IBOutlet NSComboBox				*urlField;
+
+	IBOutlet NSScrollView			*scrollView;
 	IBOutlet NSImageView			*imageView;
 	IBOutlet NSTextField			*minWidthField;
 	IBOutlet NSTextField			*minHeightField;
@@ -33,18 +36,6 @@
 	IBOutlet NSButton				*captureCancelButton;
 	IBOutlet NSTextField			*previewField;
 	
-	NSURL				*currentURL;
-	NSString			*currentTitle;
-	
-	NSSize				currentMax; // currentSize isn't needed because the size is set when the load starts
-	float				currentDelay;
-	
-	WebView				*webView;
-	NSWindow			*webWindow;
-	BOOL				isLoading;
-	
-	NSBitmapImageRep	*bitmap; 
-	NSData				*pdfData;
 	
 	IBOutlet NSMenuItem		*openRecentMenuItem;
 	IBOutlet NSMenuItem		*captureFromMenuItem;
@@ -58,9 +49,10 @@
 	IBOutlet NSTextField	*thumbnailScaleField;
 	
 	//IBOutlet NSMenuItem		*scriptMenuItem;
-	
-	NSMutableArray			*history;
+//	NSMutableArray			*history;
 }
+
+@property (assign) IBOutlet AtoZWebSnapper *snapper;
 
 + (AtoZWebSnapperWindowController *)controller;
 
@@ -69,7 +61,7 @@
 - (void)cancel:(id)sender;
 
 - (void)fetchUsingPaparazziURL:(NSURL *)url;
-- (void)fetchUsingString:(NSString *)string;
+- (void)fetchUsingString: (NSS*) string;
 - (IBAction)takeURLFromMyBrowser:(id)sender;
 
 - (IBAction)saveDocumentAs:(id)sender;

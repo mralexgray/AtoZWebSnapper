@@ -11,7 +11,7 @@
 
 @implementation MetalPopUpButtonCell
 
-- (id)initTextCell:(NSString *)title pullsDown:(BOOL)pullsDown {
+- (id)initTextCell: (NSS*) title pullsDown:(BOOL)pullsDown {
 	if (self = [super initTextCell:title pullsDown:YES]) {
 		[self setUsesItemFromMenu:NO];
 		[self setBezelStyle:NSTexturedSquareBezelStyle];

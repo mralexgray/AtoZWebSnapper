@@ -33,6 +33,7 @@ static const float kMaxDragImageDimension = 256.0;
 }
 
 - (void)setImage:(NSImage *)anImage {
+	[self.enclosingScrollView.documentView setFrame:AZRectFromSize(anImage.size)];
 	[super setImage:anImage];
 	
 	NSSize size = [anImage size];

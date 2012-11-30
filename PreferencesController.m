@@ -6,8 +6,9 @@
 //  Copyright 2005 Derailer. All rights reserved.
 //
 
+#import "AtoZWebSnapper.h"
 #import "PreferencesController.h"
-#import "PaparazziDefaultsConstants.h"
+
 
 static PreferencesController *kController = nil;
 
@@ -30,7 +31,7 @@ static PreferencesController *kController = nil;
 }
 
 - (void)awakeFromNib {
-	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+	NSUserDefaults *defaults = AZUSERDEFS;
 	
 	[filenameFormatField setStringValue:[defaults objectForKey:kAZWebSnapperFilenameFormatKey]];
 	[maxHistoryField setIntValue:[defaults integerForKey:kAZWebSnapperMaxHistoryKey]];
@@ -41,22 +42,22 @@ static PreferencesController *kController = nil;
 #pragma mark -
 
 - (IBAction)setFilenameFormat:(id)sender {
-	[[NSUserDefaults standardUserDefaults] setObject:[sender stringValue] forKey:kAZWebSnapperFilenameFormatKey];
+	[AZUSERDEFS setObject:[sender stringValue] forKey:kAZWebSnapperFilenameFormatKey];
 }
 
 - (IBAction)setMaxHistory:(id)sender {
 	if (![sender intValue])
 		[sender setIntValue:0];
 	
-	[[NSUserDefaults standardUserDefaults] setInteger:[sender intValue] forKey:kAZWebSnapperMaxHistoryKey];
+	[AZUSERDEFS setInteger:[sender intValue] forKey:kAZWebSnapperMaxHistoryKey];
 }
 
 - (IBAction)setUseGMT:(id)sender {
-	[[NSUserDefaults standardUserDefaults] setBool:[sender state] == NSOnState forKey:kAZWebSnapperUseGMTKey];
+	[AZUSERDEFS setBool:((NSBUTT*)sender).state == NSOnState forKey:kAZWebSnapperUseGMTKey];
 }
 
 - (IBAction)setThumbnailSuffix:(id)sender {
-	[[NSUserDefaults standardUserDefaults] setObject:[sender stringValue] forKey:kAZWebSnapperThumbnailSuffixKey];
+	[AZUSERDEFS setObject:[sender stringValue] forKey:kAZWebSnapperThumbnailSuffixKey];
 }
 
 - (void)controlTextDidChange:(NSNotification *)note {

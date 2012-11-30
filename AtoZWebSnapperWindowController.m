@@ -14,62 +14,19 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+#import "AtoZWebSnapper.h"
 #import "AtoZWebSnapperWindowController.h"
 #import "PreferencesController.h"
 #import "MetalImageCell.h"
 #import "NSStringAdditions.h"
 
-static NSString * const kAZWebSnapperUserAgent = @"Paparazzi!/0.3";
-
-static NSString * const kAZWebSnapperWebMinWidthKey		= @"WebMinWidth";
-static NSString * const kAZWebSnapperWebMinHeightKey		= @"WebMinHeight";
-static NSString * const kAZWebSnapperWebMaxWidthKey		= @"WebMaxWidth";
-static NSString * const kAZWebSnapperWebMaxHeightKey		= @"WebMaxHeight";
-static NSString * const kAZWebSnapperSaveFormatKey			= @"SaveFormat";
-static NSString * const kAZWebSnapperJPEGQualityKey		= @"JPEGQuality";
-static NSString * const kAZWebSnapperURLHistoryKey			= @"URLHistory";
-
-static NSString * const kAZWebSnapperThumbnailScaleKey		= @"ThumbnailScale";
-static NSString * const kAZWebSnapperSaveImageKey			= @"SaveImage";
-static NSString * const kAZWebSnapperSaveThumbnailKey		= @"SaveThumbnail";
-static NSString * const kAZWebSnapperDelayKey				= @"Delay";
-static NSString * const kAZWebSnapperThumbnailFormatKey	= @"ThumbnailFormat";
 
 
 
 static AtoZWebSnapperWindowController *kController = nil;
 
-@interface WebPreferences (StuffThatShouldBeInTheHeadersButIsNot)
-
-- (void)setShouldPrintBackgrounds:(BOOL)yesno;
-
-@end
-
-@interface WebView (StuffThatShouldBeInTheHeadersButIsNot)
-
-- (void)setMediaStyle:(NSString *)mediaStyle;
-
-@end
-
 @interface AtoZWebSnapperWindowController (Private)
 
-- (void)takeURLFromBrowser:(NSString *)name;
-- (void)takeScreenshot;
-
-- (void)fetchUsingString:(NSString *)string minSize:(NSSize)minSize cropSize:(NSSize)cropSize;
-
-- (NSString *)filenameWithFormat:(NSString *)format;
-- (void)saveAsPNG:(NSString *)filename fullSize:(BOOL)saveFullSize thumbnailScale:(float)thumbnailScale thumbnailSuffix:(NSString *)thumbnailSuffix;
-- (void)saveAsTIFF:(NSString *)filename fullSize:(BOOL)saveFullSize thumbnailScale:(float)thumbnailScale thumbnailSuffix:(NSString *)thumbnailSuffix;
-- (void)saveAsJPEG:(NSString *)filename usingCompressionFactor:(float)factor fullSize:(BOOL)saveFullSize thumbnailScale:(float)thumbnailScale thumbnailSuffix:(NSString *)thumbnailSuffix;
-- (void)saveAsPDF:(NSString *)filename;
-- (NSBitmapImageRep *)bitmapThumbnailWithScale:(float)scale;
-
-- (void)validateInputSchemeForControl:(NSControl *)control;
-
-- (void)warnOfMalformedPaparazziURL:(NSURL *)url;
-
-- (void)addURLToHistory:(NSURL *)url;
 - (NSMenu *)historyMenu;
 - (NSMenu *)captureFromMenu;
 
@@ -78,41 +35,19 @@ static AtoZWebSnapperWindowController *kController = nil;
 #pragma mark -
 
 @implementation AtoZWebSnapperWindowController
+@synthesize snapper;
 
 - (id)initWithWindow:(NSWindow *)window {
 	if (self = [super initWithWindow:window]) {
-		webWindow = [[NSWindow alloc] initWithContentRect:NSMakeRect(-16000.0, -16000.0, 100.0, 100.0) styleMask:NSBorderlessWindowMask backing:NSBackingStoreRetained defer:NO];		
-		webView = [[WebView alloc] initWithFrame:NSMakeRect(-16000.0, -16000.0, 100.0, 100.0)];
-		[webView setFrameLoadDelegate:self];
-		[webView setResourceLoadDelegate:self];
-		[webView setApplicationNameForUserAgent:kAZWebSnapperUserAgent];
-		[webView setMaintainsBackForwardList:NO];
-		
-		if ([webView respondsToSelector:@selector(setMediaStyle:)])
-			[webView setMediaStyle:@"screen"]; // We want PDFs to look like the screen render. 10.3.9+
-		
-		WebPreferences *webPrefs = [WebPreferences standardPreferences];
-		
-		//if ([webPrefs respondsToSelector:@selector(setShouldPrintBackgrounds:)])
-		//	[webPrefs setShouldPrintBackgrounds:YES];
-		
-		[webPrefs setJavaScriptCanOpenWindowsAutomatically:NO]; // That would suck.
-		[webPrefs setAllowsAnimatedImages:NO];
-		
-		// remove scrollbars, so the content is x wide and not x - 15
-		[[[webView mainFrame] frameView] setAllowsScrolling:NO];
-		
-		[webWindow setContentView:webView];
-		
+
 		// Register notifications
 		NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
-		[center addObserver:self selector:@selector(webViewProgressStarted:) name:WebViewProgressStartedNotification object:webView];
-		[center addObserver:self selector:@selector(webViewProgressEstimateChanged:) name:WebViewProgressEstimateChangedNotification object:webView];
-		[center addObserver:self selector:@selector(webViewProgressFinished:) name:WebViewProgressFinishedNotification object:webView];
+		[center addObserver:self selector:@selector(webViewProgressStarted:) name:WebViewProgressStartedNotification object:snapper.webView];
+		[center addObserver:self selector:@selector(webViewProgressEstimateChanged:) name:WebViewProgressEstimateChangedNotification object:snapper.webView];
+		[center addObserver:self selector:@selector(webViewProgressFinished:) name:WebViewProgressFinishedNotification object:snapper.webView];
 		
 		[self setWindowFrameAutosaveName:@"MainWindow"];
 		
-		history = [[[NSUserDefaults standardUserDefaults] objectForKey:kAZWebSnapperURLHistoryKey] mutableCopy];
 		
 		kController = self;
 	}
@@ -139,7 +74,7 @@ static AtoZWebSnapperWindowController *kController = nil;
 		[NSNumber numberWithFloat:0.0],			kAZWebSnapperDelayKey,
 		@"PNG",									kAZWebSnapperThumbnailFormatKey,
 		nil];
-	[[NSUserDefaults standardUserDefaults] registerDefaults:defaultDefaults];
+	[AZUSERDEFS registerDefaults:defaultDefaults];
 }
 
 + (AtoZWebSnapperWindowController *)controller {
@@ -147,30 +82,44 @@ static AtoZWebSnapperWindowController *kController = nil;
 }
 
 - (void)awakeFromNib {
-	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-	[[self window] registerForDraggedTypes:[NSArray arrayWithObjects:NSURLPboardType, NSStringPboardType, NSFilenamesPboardType, nil]];
+
+	[urlField bind:@"stringValue" toObject:snapper withKeyPath:@"currentURL" options:nil];
+
+    [snapper addObserver:self keyPath:@"webHistory" options:NSKeyValueChangeInsertion block:^(MAKVONotification *notification) {
+		NSURL * i = snapper.webHistory.lastObject;
+		NSLog(@"History has changed.  latest entry:%@", i);
+		[self addURLToHistory:i];
+	}];// forKeyPath:@"arr" options:0 context:@"myContext"];
+
+	// Display the image
+	[imageView bind:@"image" toObject:snapper withKeyPath:@"snap" options:nil];// setImage:dispImage];
+	[self observeTarget:snapper keyPath:@"bitmap" options:NSKeyValueObservingOptionNew block:^(MAKVONotification *notification) {
+		[previewField setStringValue:$(@"Preview (%lu %d %lu):", [snapper.bitmap pixelsWide], 0x00d7, [snapper.bitmap pixelsHigh])]; // 0x00d7 = multiplication sign
+	}];
+
+	[[self window] registerForDraggedTypes:@[NSURLPboardType, NSStringPboardType, NSFilenamesPboardType]];
 	[imageView unregisterDraggedTypes];
 	
-	[urlField setStringValue:[history count] ? [history objectAtIndex:0] : @"http://"];
+	[urlField setStringValue:snapper.webHistory.count ? snapper.webHistory[0] : @"http://"];
 	[openRecentMenuItem setSubmenu:[self historyMenu]];
 	[urlField noteNumberOfItemsChanged];
 	
-	unsigned maxWidth = [defaults integerForKey:kAZWebSnapperWebMaxWidthKey];
-	unsigned maxHeight = [defaults integerForKey:kAZWebSnapperWebMaxHeightKey];
+	NSUI maxWidth = [AZUSERDEFS integerForKey:kAZWebSnapperWebMaxWidthKey];
+	NSUI maxHeight = [AZUSERDEFS integerForKey:kAZWebSnapperWebMaxHeightKey];
 	
-	[minWidthField setIntValue:[defaults integerForKey:kAZWebSnapperWebMinWidthKey]];
-	[minHeightField setIntValue:[defaults integerForKey:kAZWebSnapperWebMinHeightKey]];
+	[minWidthField setIntegerValue:[AZUSERDEFS integerForKey:kAZWebSnapperWebMinWidthKey]];
+	[minHeightField setIntegerValue:[AZUSERDEFS integerForKey:kAZWebSnapperWebMinHeightKey]];
 	
 	if (maxWidth)
-		[maxWidthField setIntValue:maxWidth];
+		[maxWidthField setIntegerValue:maxWidth];
 	if (maxHeight)
-		[maxHeightField setIntValue:maxHeight];
+		[maxHeightField setIntegerValue:maxHeight];
 	
-	[delayField setFloatValue:[defaults floatForKey:kAZWebSnapperDelayKey]];
+	[delayField setFloatValue:[AZUSERDEFS floatForKey:kAZWebSnapperDelayKey]];
 
-	[[self window] setExcludedFromWindowsMenu:YES];
+	self.window.excludedFromWindowsMenu = YES;
 	
-	[[captureFromMenuItem submenu] setDelegate:self];
+	captureFromMenuItem.submenu.delegate = (id)self;
 	
 #if 0
 	[scriptMenuItem setTitle:@""];
@@ -183,26 +132,27 @@ static AtoZWebSnapperWindowController *kController = nil;
 #endif
 }
 
-- (IBAction)fetch:(id)sender {
-	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+- (IBAction)fetch:(id)sender
+{
+
 	NSSize newSize = NSMakeSize([minWidthField floatValue], [minHeightField floatValue]);
 	NSURL *url = [NSURL URLWithString:[urlField stringValue]];
-	currentMax = NSMakeSize([maxWidthField floatValue], [maxHeightField floatValue]);
-	currentDelay = [delayField floatValue];
+	snapper.currentMax = NSMakeSize([maxWidthField floatValue], [maxHeightField floatValue]);
+	snapper.currentDelay = [delayField floatValue];
 	
-	[defaults setInteger:[minWidthField intValue] forKey:kAZWebSnapperWebMinWidthKey];
-	[defaults setInteger:[minHeightField intValue] forKey:kAZWebSnapperWebMinHeightKey];
-	[defaults setInteger:[maxWidthField intValue] forKey:kAZWebSnapperWebMaxWidthKey];
-	[defaults setInteger:[maxHeightField intValue] forKey:kAZWebSnapperWebMaxHeightKey];
-	[defaults setFloat:currentDelay forKey:kAZWebSnapperDelayKey];
+	[AZUSERDEFS setInteger:[minWidthField intValue] forKey:kAZWebSnapperWebMinWidthKey];
+	[AZUSERDEFS setInteger:[minHeightField intValue] forKey:kAZWebSnapperWebMinHeightKey];
+	[AZUSERDEFS setInteger:[maxWidthField intValue] forKey:kAZWebSnapperWebMaxWidthKey];
+	[AZUSERDEFS setInteger:[maxHeightField intValue] forKey:kAZWebSnapperWebMaxHeightKey];
+	[AZUSERDEFS setFloat:snapper.currentDelay forKey:kAZWebSnapperDelayKey];
 
-	[webWindow setContentSize:newSize];
+	[snapper.webWindow setContentSize:newSize];
 	
-	[webView setFrameSize:newSize];
+	[snapper.webView setFrameSize:newSize];
 	
 	[self validateInputSchemeForControl:urlField];
 		
-	[[webView mainFrame] loadRequest:[NSURLRequest requestWithURL:url]];
+	[[snapper.webView mainFrame] loadRequest:[NSURLRequest requestWithURL:url]];
 }
 
 - (IBAction)urlFieldEnter:(id)sender {
@@ -210,7 +160,7 @@ static AtoZWebSnapperWindowController *kController = nil;
 }
 
 - (void)cancel:(id)sender {
-	[webView stopLoading:sender];
+	[snapper.webView stopLoading:sender];
 }
 
 - (void)webView:(WebView *)sender didFailProvisionalLoadWithError:(NSError *)error forFrame:(WebFrame *)frame {	
@@ -227,131 +177,38 @@ static AtoZWebSnapperWindowController *kController = nil;
 	}
 }
 
-- (void)alertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
-	// we don't really need to do anything here after the user has clicked 'ok' to the alert
-	// other than releasing the object of course
-}
-
-- (void)webView:(WebView *)sender didFinishLoadForFrame:(WebFrame *)frame {	
-	if (frame == [sender mainFrame]) {
-		WebDataSource *dataSource = [frame dataSource];
-		currentURL = [[dataSource request] URL];
-		
-		[self addURLToHistory:currentURL];
-		[urlField setStringValue:[currentURL absoluteString]];
-		[urlField noteNumberOfItemsChanged];
-		
-		currentTitle = [dataSource pageTitle];
-		[[self window] setTitle:[@"Paparazzi!: " stringByAppendingString:currentTitle]];
-		
-		// set the size to the natural contents of the page
-		NSView *viewport = [[[webView mainFrame] frameView] documentView]; // width/height of html page
-		NSWindow *viewportWindow = [viewport window];
-		NSRect viewportBounds = [viewport bounds];
-		
-		[viewportWindow display];
-		[viewportWindow setContentSize:viewportBounds.size];
-		[viewport setFrame:viewportBounds];
-		
-		//[self takeScreenshot];
-		[self performSelector:@selector(takeScreenshot) withObject:nil afterDelay:currentDelay]; // allow snapping of Flash sites. XXX make user-definable!
-		
-		[saveButton setEnabled:YES];
-		[pageLoadProgress setHidden:YES];
-	}
-}
-
-- (void)webViewProgressStarted:(NSNotification *)notification {	
-	isLoading = YES;
+- (void)webViewProgressStarted:(NSNotification *)notification {
+	snapper.isLoading = YES;
 
 	[NSObject cancelPreviousPerformRequestsWithTarget:self]; // stop pending captures
-	
+
 	[captureCancelButton setTitle:NSLocalizedString(@"Cancel", nil)];
 	[captureCancelButton setAction:@selector(cancel:)];
-	
+
 	[pageLoadProgress setHidden:NO];
 	[pageLoadProgress setDoubleValue:0.0];
 }
 
 - (void)webViewProgressEstimateChanged:(NSNotification *)notification {
-	[pageLoadProgress setDoubleValue:[webView estimatedProgress]];
+	[pageLoadProgress setDoubleValue:[snapper.webView estimatedProgress]];
 }
 
-- (void)webViewProgressFinished:(NSNotification *)notification {	
-	isLoading = NO;
-	
+- (void)webViewProgressFinished:(NSNotification *)notification {
+	snapper.isLoading = NO;
+
 	[pageLoadProgress setHidden:YES];
-	
+
 	[captureCancelButton setTitle:[NSLocalizedString(@"Capture", nil) stringByAppendingString:@"!"]];
 	[captureCancelButton setAction:@selector(fetch:)];
 }
-
-#pragma mark -
-
-- (void)takeScreenshot {
-	NSView *viewport = [[[webView mainFrame] frameView] documentView]; // width/height of html page
-	NSRect viewportBounds = [viewport bounds];
-	
-	float cropHeight = currentMax.height ? MIN(currentMax.height, viewportBounds.size.height) : viewportBounds.size.height;
-		
-	NSRect cropBounds = NSMakeRect(0.0, viewportBounds.size.height - cropHeight,
-							 currentMax.width ? MIN(currentMax.width, viewportBounds.size.width) : viewportBounds.size.width,
-							 cropHeight);	
-
-	// take the screenshot
-	[webView lockFocus];
-	bitmap = [[NSBitmapImageRep alloc] initWithFocusedViewRect:cropBounds];
-	[webView unlockFocus];
-	
-	pdfData = [webView dataWithPDFInsideRect:cropBounds];
-	NSImage *dispImage = [[NSImage alloc] initWithData:[bitmap TIFFRepresentation]];
-	
-	// Display the image
-	[imageView setImage:dispImage];
-	[previewField setStringValue:[NSString stringWithFormat:@"Preview (%u %C %u):", [bitmap pixelsWide], 0x00d7, [bitmap pixelsHigh]]]; // 0x00d7 = multiplication sign
-}
-
-#pragma mark -
-#pragma mark Save
-
-- (IBAction)saveDocumentAs:(id)sender {
-	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-	// figure out a suitable string for the filename
-	//NSString *host = [currentURL host];
-	//NSMutableString *suggestedFileName = [NSMutableString stringWithFormat:@"%@%@", host ? host : @"", [currentURL path]];
-	NSMutableString *suggestedFileName = [NSMutableString stringWithString:[self filenameWithFormat:[defaults objectForKey:kAZWebSnapperFilenameFormatKey]]];
-	
-	// Replace path delmiters
-	[suggestedFileName replaceOccurrencesOfString:@"/" withString:@"-" options:NSLiteralSearch range:NSMakeRange(0, [suggestedFileName length])];
-	[suggestedFileName replaceOccurrencesOfString:@":" withString:@"-" options:NSLiteralSearch range:NSMakeRange(0, [suggestedFileName length])];
-	
-	savePanel = [NSSavePanel savePanel];
-	[savePanel setCanSelectHiddenExtension:YES];
-	
-	NSString *saveFormat = [defaults objectForKey:kAZWebSnapperSaveFormatKey];
-	
-	if ([fileFormatPopUp indexOfItemWithTitle:saveFormat] != -1)
-		[fileFormatPopUp selectItemWithTitle:saveFormat];
-	else
-		[fileFormatPopUp selectItemWithTitle:@"PNG"];
-	
-	BOOL saveThumbnail = [defaults boolForKey:kAZWebSnapperSaveThumbnailKey];
-	BOOL saveImage = [defaults boolForKey:kAZWebSnapperSaveImageKey];
-	
-	[saveThumbnailSwitch setState:saveThumbnail ? NSOnState : NSOffState];
-	[thumbnailScaleField setEnabled:saveThumbnail];
-
-	[saveImageSwitch setState:saveImage ? NSOnState : NSOffState];
-
-	[qualitySlider setFloatValue:[[defaults objectForKey:kAZWebSnapperJPEGQualityKey] floatValue]];
-	[self setFileFormat:fileFormatPopUp]; // Also sets the required file type.
-	[savePanel setAccessoryView:accessoryView];
-	[savePanel beginSheetForDirectory:nil file:suggestedFileName modalForWindow:[self window] modalDelegate:self didEndSelector:@selector(savePanelDidEnd:returnCode:contextInfo:) contextInfo:NULL];
+- (void)alertDidEnd:(NSAlert *)alert returnCode:(int)returnCode contextInfo:(void *)contextInfo {
+	// we don't really need to do anything here after the user has clicked 'ok' to the alert
+	// other than releasing the object of course
 }
 
 - (void)savePanelDidEnd:(NSSavePanel *)sheet returnCode:(int)returnCode contextInfo:(void *)contextInfo {
 	if (returnCode == NSOKButton) {
-		NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+
 		NSString *fileType = [[fileFormatPopUp selectedItem] title];
 		float quality = [qualitySlider floatValue];
 		NSString *filename = [sheet filename];
@@ -364,29 +221,70 @@ static AtoZWebSnapperWindowController *kController = nil;
 		
 		if (saveThumbnail) {
 			thumbnailScale = [thumbnailScaleField floatValue];
-			thumbnailSuffix = [defaults objectForKey:kAZWebSnapperThumbnailSuffixKey];
+			thumbnailSuffix = [AZUSERDEFS objectForKey:kAZWebSnapperThumbnailSuffixKey];
 		}
 					
 		if ([fileType isEqualToString:@"PNG"])
-			[self saveAsPNG:filename fullSize:saveImage thumbnailScale:thumbnailScale thumbnailSuffix:thumbnailSuffix];
+			[snapper saveAsPNG:filename fullSize:saveImage thumbnailScale:thumbnailScale thumbnailSuffix:thumbnailSuffix];
 		else if ([fileType isEqualToString:@"TIFF"])
-			[self saveAsTIFF:filename fullSize:saveImage thumbnailScale:thumbnailScale thumbnailSuffix:thumbnailSuffix];
+			[snapper saveAsTIFF:filename fullSize:saveImage thumbnailScale:thumbnailScale thumbnailSuffix:thumbnailSuffix];
 		else if ([fileType isEqualToString:@"JPEG"])
-			[self saveAsJPEG:filename usingCompressionFactor:quality fullSize:saveImage thumbnailScale:thumbnailScale thumbnailSuffix:thumbnailSuffix];
+			[snapper saveAsJPEG:filename usingCompressionFactor:quality fullSize:saveImage thumbnailScale:thumbnailScale thumbnailSuffix:thumbnailSuffix];
 		else if ([fileType isEqualToString:@"PDF"]) {
-			[self saveAsPDF:filename];
+			[snapper saveAsPDF:filename];
 		} else
 			NSLog(@"Bad file format: %@", fileType);
 				
-		[defaults setObject:fileType forKey:kAZWebSnapperSaveFormatKey];
-		[defaults setFloat:quality forKey:kAZWebSnapperJPEGQualityKey];
-		[defaults setFloat:thumbnailScale forKey:kAZWebSnapperThumbnailScaleKey];
-		[defaults setBool:saveImage forKey:kAZWebSnapperSaveImageKey];
-		[defaults setBool:saveThumbnail forKey:kAZWebSnapperSaveThumbnailKey];
+		[AZUSERDEFS setObject:fileType forKey:kAZWebSnapperSaveFormatKey];
+		[AZUSERDEFS setFloat:quality forKey:kAZWebSnapperJPEGQualityKey];
+		[AZUSERDEFS setFloat:thumbnailScale forKey:kAZWebSnapperThumbnailScaleKey];
+		[AZUSERDEFS setBool:saveImage forKey:kAZWebSnapperSaveImageKey];
+		[AZUSERDEFS setBool:saveThumbnail forKey:kAZWebSnapperSaveThumbnailKey];
 		
 		savePanel = nil;
 	}
 }
+
+#pragma mark -
+#pragma mark Save
+
+- (IBAction)saveDocumentAs:(id)sender {
+
+	// figure out a suitable string for the filename
+	NSString *host = [snapper.currentURL host];
+	NSMutableString *suggestedFileName = [NSMutableString stringWithFormat:@"%@%@", host ? host : @"", [snapper.currentURL path]];
+//	NSMutableString *suggestedFileName = [NSMutableString stringWithString:[snapper filenameWithFormat:[AZUSERDEFS objectForKey:kAZWebSnapperFilenameFormatKey]]];
+
+	// Replace path delmiters
+	[suggestedFileName replaceOccurrencesOfString:@"/" withString:@"-" options:NSLiteralSearch range:NSMakeRange(0, [suggestedFileName length])];
+	[suggestedFileName replaceOccurrencesOfString:@":" withString:@"-" options:NSLiteralSearch range:NSMakeRange(0, [suggestedFileName length])];
+
+	savePanel = [NSSavePanel savePanel];
+	[savePanel setCanSelectHiddenExtension:YES];
+
+	NSString *saveFormat = [AZUSERDEFS objectForKey:kAZWebSnapperSaveFormatKey];
+
+	if ([fileFormatPopUp indexOfItemWithTitle:saveFormat] != -1)
+		[fileFormatPopUp selectItemWithTitle:saveFormat];
+	else
+		[fileFormatPopUp selectItemWithTitle:@"PNG"];
+
+	BOOL saveThumbnail = [AZUSERDEFS boolForKey:kAZWebSnapperSaveThumbnailKey];
+	BOOL saveImage = [AZUSERDEFS boolForKey:kAZWebSnapperSaveImageKey];
+
+	[saveThumbnailSwitch setState:saveThumbnail ? NSOnState : NSOffState];
+	[thumbnailScaleField setEnabled:saveThumbnail];
+
+	[saveImageSwitch setState:saveImage ? NSOnState : NSOffState];
+
+	[qualitySlider setFloatValue:[[AZUSERDEFS objectForKey:kAZWebSnapperJPEGQualityKey] floatValue]];
+	[self setFileFormat:fileFormatPopUp]; // Also sets the required file type.
+	[savePanel setAccessoryView:accessoryView];
+	[savePanel beginSheetForDirectory:nil file:suggestedFileName modalForWindow:[self window] modalDelegate:self didEndSelector:@selector(savePanelDidEnd:returnCode:contextInfo:) contextInfo:NULL];
+}
+
+
+
 
 - (IBAction)setFileFormat:(id)sender {
 	if (savePanel) {
@@ -421,121 +319,10 @@ static AtoZWebSnapperWindowController *kController = nil;
 	}
 }
 
-- (NSString *)filenameWithFormat:(NSString *)format {
-	NSMutableString *str = [NSMutableString stringWithCapacity:128];
-	
-	if (format) {
-		unsigned i = 0, len = [format length];
-		NSCalendarDate *now = [NSCalendarDate calendarDate];
-		
-		if ([[[NSUserDefaults standardUserDefaults] objectForKey:kAZWebSnapperUseGMTKey] boolValue])
-			[now setTimeZone:[NSTimeZone timeZoneWithName:@"GMT"]];
-				
-		NSString *key, *rep;
-		
-		NSString *host = [currentURL host];
-		
-		if (!host)
-			host = @"localhost";
-				
-		NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys:
-			currentTitle,							@"%t",
-			[currentURL absoluteString],			@"%u",
-			[[currentURL path] lastPathComponent],	@"%f",
-			host,									@"%h",
-			[NSString stringWithFormat:@"%u", [now yearOfCommonEra]],	@"%y",
-			[NSString stringWithFormat:@"%02u", [now monthOfYear]],		@"%m",
-			[NSString stringWithFormat:@"%02u", [now dayOfMonth]],		@"%d",
-			[NSString stringWithFormat:@"%02u", [now hourOfDay]],		@"%H",
-			[NSString stringWithFormat:@"%02u", [now minuteOfHour]],	@"%M",
-			[[now timeZone] abbreviation],				@"%Z",
-			[[currentURL absoluteString] MD5String],	@"%5",
-			@"%", @"%%",
-			nil];
-		
-		for (i = 0; i < len; ++i) {
-			unichar c = [format characterAtIndex:i];
-			
-			if (c == '%') {
-				if (i < len - 1) {
-					key = [format substringWithRange:NSMakeRange(i, 2)];
-					rep = [dict objectForKey:key];
-					
-					if (rep) {						
-						[str appendString:rep];
-					} else
-						[str appendString:@""];
-					
-					++i;
-				}
-			} else
-				[str appendFormat:@"%C", c];
-		}
-	}
-	
-	return [NSString stringWithString:str];
-}
 
-- (void)saveAsPNG:(NSString *)filename fullSize:(BOOL)saveFullSize thumbnailScale:(float)thumbnailScale thumbnailSuffix:(NSString *)thumbnailSuffix {
-	if (filename) {
-		if (saveFullSize)
-			[[bitmap representationUsingType:NSPNGFileType properties:nil] writeToFile:filename atomically:YES];
-		
-		if (thumbnailScale > 0.0001 && [thumbnailSuffix length]) {
-			NSString *thumbName = [NSString stringWithFormat:@"%@%@.%@", [filename stringByDeletingPathExtension], thumbnailSuffix, [filename pathExtension]];
-			NSBitmapImageRep *thumb = [self bitmapThumbnailWithScale:thumbnailScale];
-			[[thumb representationUsingType:NSPNGFileType properties:nil] writeToFile:thumbName atomically:YES];
-		}
-	}
-}
-
-- (void)saveAsTIFF:(NSString *)filename fullSize:(BOOL)saveFullSize thumbnailScale:(float)thumbnailScale thumbnailSuffix:(NSString *)thumbnailSuffix {
-	if (filename) {		
-		if (saveFullSize)
-			[[bitmap TIFFRepresentationUsingCompression:NSTIFFCompressionLZW factor:0.0] writeToFile:filename atomically:YES];
-		
-		if (thumbnailScale > 0.0001 && [thumbnailSuffix length]) {
-			NSString *thumbName = [NSString stringWithFormat:@"%@%@.%@", [filename stringByDeletingPathExtension], thumbnailSuffix, [filename pathExtension]];
-			NSBitmapImageRep *thumb = [self bitmapThumbnailWithScale:thumbnailScale];
-			[[thumb TIFFRepresentationUsingCompression:NSTIFFCompressionLZW factor:0.0] writeToFile:thumbName atomically:YES];
-		}
-	}
-}
-
-- (void)saveAsJPEG:(NSString *)filename usingCompressionFactor:(float)factor fullSize:(BOOL)saveFullSize thumbnailScale:(float)thumbnailScale thumbnailSuffix:(NSString *)thumbnailSuffix {
-	if (filename) {		
-		if (saveFullSize)
-			[[bitmap representationUsingType:NSJPEGFileType properties:[NSDictionary dictionaryWithObject:[NSNumber numberWithFloat:factor] forKey:NSImageCompressionFactor]] writeToFile:filename atomically:YES];
-		
-		if (thumbnailScale > 0.0001 && [thumbnailSuffix length]) {
-			NSString *thumbName = [NSString stringWithFormat:@"%@%@.%@", [filename stringByDeletingPathExtension], thumbnailSuffix, [filename pathExtension]];
-			NSBitmapImageRep *thumb = [self bitmapThumbnailWithScale:thumbnailScale];
-			[[thumb representationUsingType:NSJPEGFileType properties:[NSDictionary dictionaryWithObject:[NSNumber numberWithFloat:factor] forKey:NSImageCompressionFactor]] writeToFile:thumbName atomically:YES];
-		}
-	}
-}
-
-- (void)saveAsPDF:(NSString *)filename {
-	[pdfData writeToFile:filename atomically:YES];
-}
-
-- (NSBitmapImageRep *)bitmapThumbnailWithScale:(float)scale {
-	float width = rintf((float)[bitmap pixelsWide] * scale);
-	float height = rintf((float)[bitmap pixelsHigh] * scale);
-	NSRect thumbRect = NSMakeRect(0.0, 0.0, width, height);
-	NSSize size = NSMakeSize(width, height);
-	NSImage *img = [[NSImage alloc] initWithSize:size];
-	NSBitmapImageRep *rep;
-	[img lockFocus];
-	[[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
-	[bitmap drawInRect:thumbRect];
-	rep = [[NSBitmapImageRep alloc] initWithFocusedViewRect:thumbRect];
-	[img unlockFocus];
-	return rep;
-}
-
-- (IBAction)toggleSaveThumbnail:(id)sender {
-	[thumbnailScaleField setEnabled:[sender state] == NSOnState];
+- (IBAction)toggleSaveThumbnail:(id)sender
+{
+	[thumbnailScaleField setEnabled:((NSBUTT*)sender).state == NSOnState];
 }
 
 #pragma mark -
@@ -548,33 +335,34 @@ static AtoZWebSnapperWindowController *kController = nil;
 #pragma mark -
 #pragma mark URL History
 
-- (void)addURLToHistory:(NSURL *)url {
-	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-	unsigned max = [[defaults objectForKey:kAZWebSnapperMaxHistoryKey] unsignedIntValue];
+- (void)addURLToHistory:(NSURL *)url
+{
+	NSLog(@"supposed to add: %@", url);
+	unsigned max = [[AZUSERDEFS objectForKey:kAZWebSnapperMaxHistoryKey] unsignedIntValue];
 	NSString *urlString = [url absoluteString];
 	
-	if ([history containsObject:urlString])
-		[history removeObject:urlString];
-	else if ([history count] > max)
-		[history removeObjectAtIndex:max - 1];
+	if ([snapper.webHistory containsObject:urlString])
+		[snapper.webHistory removeObject:urlString];
+	else if (snapper.webHistory.count > max)
+		[snapper.webHistory removeObjectAtIndex:max - 1];
 	
-	[history insertObject:urlString atIndex:0];
-	[urlField setNumberOfVisibleItems:MIN(10, [history count])];
-	[defaults setObject:history forKey:kAZWebSnapperURLHistoryKey];
+//	[snapper.webhistory insertObject:urlString atIndex:0];
+	[urlField setNumberOfVisibleItems:MIN(10, snapper.webHistory.count)];
+	[AZUSERDEFS setObject:snapper.webHistory forKey:kAZWebSnapperURLHistoryKey];
 	[openRecentMenuItem setSubmenu:[self historyMenu]];
 }
 
 - (void)clearRecentDocuments:(id)sender {
-	[history removeAllObjects];
+	[snapper.webHistory removeAllObjects];
 	[urlField noteNumberOfItemsChanged];
 	[openRecentMenuItem setSubmenu:[self historyMenu]];
-	[[NSUserDefaults standardUserDefaults] setObject:history forKey:kAZWebSnapperURLHistoryKey];
+	[AZUSERDEFS setObject:snapper.webHistory forKey:kAZWebSnapperURLHistoryKey];
 }
 
 - (NSMenu *)historyMenu {
 	NSMenu *menu = [[NSMenu alloc] initWithTitle:@"History"];
 	
-	if ([history count]) {NSEnumerator *histEnum = [history objectEnumerator];
+	if (snapper.webHistory.count) {NSEnumerator *histEnum = [snapper.webHistory objectEnumerator];
 		NSString *urlString;
 		
 		while (urlString = [histEnum nextObject]) {
@@ -625,7 +413,7 @@ static AtoZWebSnapperWindowController *kController = nil;
 				NSCharacterSet *whitespace = [NSCharacterSet whitespaceCharacterSet];
 				NSString *pair;
 				
-				while (pair = [[e nextObject] stringByTrimmingCharactersInSet:whitespace]) {
+				while ((pair = [e.nextObject stringByTrimmingCharactersInSet:whitespace])) {
 					NSArray *keyValue = [pair componentsSeparatedByString:@"="];
 					
 					NSString *key = [[keyValue objectAtIndex:0] stringByTrimmingCharactersInSet:whitespace];
@@ -668,7 +456,7 @@ static AtoZWebSnapperWindowController *kController = nil;
 		[self fetchUsingString:[url absoluteString]];
 }
 
-- (void)fetchUsingString:(NSString *)string {
+- (void)fetchUsingString: (NSS*) string {
 	if (string) {
 		[NSApp activateIgnoringOtherApps:YES];
 		[self showWindow:nil];
@@ -677,29 +465,29 @@ static AtoZWebSnapperWindowController *kController = nil;
 	}
 }
 
-- (void)fetchUsingString:(NSString *)string minSize:(NSSize)minSize cropSize:(NSSize)cropSize {
+- (void)fetchUsingString: (NSS*) string minSize:(NSSize)minSize cropSize:(NSSize)cropSize {
 	if (minSize.width > 0.0)
-		[minWidthField setIntValue:minSize.width];	
+		[minWidthField setIntegerValue:minSize.width];	
 	if (minSize.height > 0.0)
-		[minHeightField setIntValue:minSize.height];
+		[minHeightField setIntegerValue:minSize.height];
 	if (cropSize.width > -0.5) {
 		if (cropSize.width == 0.0)
 			[maxWidthField setStringValue:@""];
 		else
-			[maxWidthField setIntValue:cropSize.width];
+			[maxWidthField setIntegerValue:cropSize.width];
 	}
 	
 	if (cropSize.height > -0.5) {
 		if (cropSize.height == 0.0)
 			[maxHeightField setStringValue:@""];
 		else
-			[maxHeightField setIntValue:cropSize.height];
+			[maxHeightField setIntegerValue:cropSize.height];
 	}
 	
 	[self fetchUsingString:string];
 }
 
-- (void)takeURLFromBrowser:(NSString *)name {
+- (void)takeURLFromBrowser: (NSS*) name {
 	NSString *path = [[NSBundle mainBundle] pathForResource:name ofType:@"scpt" inDirectory:@"Take URL From"];
 		
 	if (path) {
@@ -773,7 +561,7 @@ static AtoZWebSnapperWindowController *kController = nil;
 // NSApplication delegation
 //--------------------------------------------------------------//
 
-- (BOOL)application:(NSApplication *)app openFile:(NSString *)filename {
+- (BOOL)application:(NSApplication *)app openFile: (NSS*) filename {
 	NSURL *fileURL = [NSURL fileURLWithPath:filename];
 	[urlField setStringValue:[fileURL absoluteString]];
 	[self showWindow:nil];
@@ -811,14 +599,14 @@ static AtoZWebSnapperWindowController *kController = nil;
 - (BOOL)validateMenuItem:(NSMenuItem*)item {
 	SEL action = [item action];
 	
-	if ((action == @selector(saveDocumentAs:)) && (!currentURL || !bitmap))
+	if ((action == @selector(saveDocumentAs:)) && (!snapper.currentURL || !snapper.bitmap))
 		return NO;
 	else if (action == @selector(showWindow:)) {
 		if ([[self window] isVisible])
 			[item setState:NSOnState];
 		else
 			[item setState:NSOffState];
-	} else if ((action == @selector(clearRecentDocuments:)) && ([history count] == 0))
+	} else if ((action == @selector(clearRecentDocuments:)) && ([snapper.webHistory count] == 0))
 		return NO;
 	
 	return YES;
@@ -834,7 +622,7 @@ static AtoZWebSnapperWindowController *kController = nil;
 #pragma mark -
 
 - (void)cancelOperation:(id)sender {
-	if (isLoading)
+	if (snapper.isLoading)
 		[self cancel:sender];
 }
 
@@ -903,15 +691,17 @@ static AtoZWebSnapperWindowController *kController = nil;
 
 #pragma mark -
 
-- (int)numberOfItemsInComboBox:(NSComboBox *)aComboBox {
-	return [history count];
+- (NSUI)numberOfItemsInComboBox:(NSComboBox *)aComboBox
+{
+	return snapper.webHistory.count;
 }
 
-- (id)comboBox:(NSComboBox *)aComboBox objectValueForItemAtIndex:(int)index {
-	return [history objectAtIndex:index];
+- (id)comboBox:(NSComboBox *)aComboBox objectValueForItemAtIndex:(int)index
+{
+	return snapper.webHistory[index];
 }
 
-- (NSString *)comboBox:(NSComboBox *)aComboBox completedString:(NSString *)uncompletedString {	
+- (NSString *)comboBox:(NSComboBox *)aComboBox completedString: (NSS*) uncompletedString {	
 	NSURL *url = [NSURL URLWithString:uncompletedString];
 	if ([[url scheme] length] && (![[url resourceSpecifier] length] || [[url resourceSpecifier] isEqualToString:@"/"]))
 		return uncompletedString;
@@ -923,7 +713,7 @@ static AtoZWebSnapperWindowController *kController = nil;
 	else
 		httpString = [@"http://" stringByAppendingString:uncompletedString];
 	
-	NSEnumerator *e = [history objectEnumerator];
+	NSEnumerator *e = [snapper.webHistory objectEnumerator];
 	NSString *obj;
 	
 	while (obj = [e nextObject]) {

@@ -13,7 +13,7 @@ static NSShadow *bevel;
 
 @implementation MetalTextFieldCell
 
-- (id)initTextCell:(NSString *)string {
+- (id)initTextCell: (NSS*) string {
 	self = [super initTextCell:string];
 	
 	return self;

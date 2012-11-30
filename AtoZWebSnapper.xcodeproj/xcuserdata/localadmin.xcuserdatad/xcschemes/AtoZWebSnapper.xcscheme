@@ -17,7 +17,7 @@
                BlueprintIdentifier = "7B2179B41603533200EF2F92"
                BuildableName = "AtoZWebSnapper.framework"
                BlueprintName = "AtoZWebSnapper"
-               ReferencedContainer = "container:Paparazzi!.xcodeproj">
+               ReferencedContainer = "container:AtoZWebSnapper.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>

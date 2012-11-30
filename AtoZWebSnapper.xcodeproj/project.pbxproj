@@ -18,6 +18,9 @@
 		7B0E4BA21668638E00CA1684 /* Camino.scpt in CopyFiles */ = {isa = PBXBuildFile; fileRef = B2A5811608BC745D00D06FB6 /* Camino.scpt */; };
 		7B0E4BA31668639000CA1684 /* Safari.scpt in CopyFiles */ = {isa = PBXBuildFile; fileRef = B2A5811708BC745D00D06FB6 /* Safari.scpt */; };
 		7B0E4BA4166863CA00CA1684 /* AtoZWebSnapperWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 04EBE45006BEED6900770D0D /* AtoZWebSnapperWindowController.m */; };
+		7B0E4BA616686E7400CA1684 /* AtoZWebSnapperWindowController.h in Headers */ = {isa = PBXBuildFile; fileRef = 04EBE45106BEED6900770D0D /* AtoZWebSnapperWindowController.h */; };
+		7B0E4BA916687BEB00CA1684 /* AtoZWebSnapperGridViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 7B0E4BA716687BEA00CA1684 /* AtoZWebSnapperGridViewController.h */; };
+		7B0E4BAA16687BEB00CA1684 /* AtoZWebSnapperGridViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7B0E4BA816687BEA00CA1684 /* AtoZWebSnapperGridViewController.m */; };
 		7B2179B71603533200EF2F92 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7B2179B61603533200EF2F92 /* Cocoa.framework */; };
 		7B2179BE1603533200EF2F92 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7B2179BC1603533200EF2F92 /* InfoPlist.strings */; };
 		7B2179C21603533200EF2F92 /* AtoZWebSnapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 7B2179C11603533200EF2F92 /* AtoZWebSnapper.m */; };
@@ -87,8 +90,8 @@
 /* Begin PBXFileReference section */
 		0410DF9E06C2EA570071AD2F /* Paparazzi.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = Paparazzi.icns; sourceTree = "<group>"; };
 		04EBE3F606BEE93100770D0D /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = /System/Library/Frameworks/WebKit.framework; sourceTree = "<absolute>"; };
-		04EBE45006BEED6900770D0D /* AtoZWebSnapperWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AtoZWebSnapperWindowController.m; sourceTree = "<group>"; };
-		04EBE45106BEED6900770D0D /* AtoZWebSnapperWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AtoZWebSnapperWindowController.h; sourceTree = "<group>"; };
+		04EBE45006BEED6900770D0D /* AtoZWebSnapperWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AtoZWebSnapperWindowController.m; sourceTree = SOURCE_ROOT; };
+		04EBE45106BEED6900770D0D /* AtoZWebSnapperWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AtoZWebSnapperWindowController.h; sourceTree = SOURCE_ROOT; };
 		089C165DFE840E0CC02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -97,6 +100,8 @@
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		32CA4F630368D1EE00C91783 /* Paparazzi_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Paparazzi_Prefix.pch; sourceTree = "<group>"; };
 		7B0E4B9616685FA400CA1684 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk/System/Library/Frameworks/WebKit.framework; sourceTree = DEVELOPER_DIR; };
+		7B0E4BA716687BEA00CA1684 /* AtoZWebSnapperGridViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AtoZWebSnapperGridViewController.h; sourceTree = "<group>"; };
+		7B0E4BA816687BEA00CA1684 /* AtoZWebSnapperGridViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AtoZWebSnapperGridViewController.m; sourceTree = "<group>"; };
 		7B2179B51603533200EF2F92 /* AtoZWebSnapper.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = AtoZWebSnapper.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		7B2179B61603533200EF2F92 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		7B2179B81603533200EF2F92 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
@@ -106,7 +111,7 @@
 		7B2179C01603533200EF2F92 /* AtoZWebSnapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AtoZWebSnapper.h; sourceTree = "<group>"; };
 		7B2179C11603533200EF2F92 /* AtoZWebSnapper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AtoZWebSnapper.m; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; languageSpecificationIdentifier = html; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* Paparazzi!.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Paparazzi!.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* AtoZWebSnapper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AtoZWebSnapper.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B205F91C09041DB4007DA0A1 /* NSStringAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSStringAdditions.h; sourceTree = "<group>"; };
 		B205F91D09041DB4007DA0A1 /* NSStringAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSStringAdditions.m; sourceTree = "<group>"; };
 		B23A4F9F08F8FF8B005943DC /* PaparazziDefaultsConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PaparazziDefaultsConstants.h; sourceTree = "<group>"; };
@@ -197,7 +202,7 @@
 		19C28FACFE9D520D11CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				8D1107320486CEB800E47090 /* Paparazzi!.app */,
+				8D1107320486CEB800E47090 /* AtoZWebSnapper.app */,
 				7B2179B51603533200EF2F92 /* AtoZWebSnapper.framework */,
 			);
 			name = Products;
@@ -260,6 +265,10 @@
 				B280894A08BAD20C00B5CB23 /* Controls */,
 				7B2179C01603533200EF2F92 /* AtoZWebSnapper.h */,
 				7B2179C11603533200EF2F92 /* AtoZWebSnapper.m */,
+				04EBE45106BEED6900770D0D /* AtoZWebSnapperWindowController.h */,
+				04EBE45006BEED6900770D0D /* AtoZWebSnapperWindowController.m */,
+				7B0E4BA716687BEA00CA1684 /* AtoZWebSnapperGridViewController.h */,
+				7B0E4BA816687BEA00CA1684 /* AtoZWebSnapperGridViewController.m */,
 				7B2179BA1603533200EF2F92 /* Supporting Files */,
 			);
 			path = AtoZWebSnapper;
@@ -288,8 +297,6 @@
 				B2A4FFA008A7783600DBCF81 /* MetalTextField.m */,
 				B2A4FF8C08A7775900DBCF81 /* MetalTextFieldCell.h */,
 				B2A4FF8D08A7775900DBCF81 /* MetalTextFieldCell.m */,
-				04EBE45106BEED6900770D0D /* AtoZWebSnapperWindowController.h */,
-				04EBE45006BEED6900770D0D /* AtoZWebSnapperWindowController.m */,
 			);
 			name = Controls;
 			path = ..;
@@ -322,6 +329,8 @@
 				7B75D00116039C28002A7C3B /* MetalPopUpButtonCell.h in Headers */,
 				7B75D00216039C28002A7C3B /* MetalTextField.h in Headers */,
 				7B75D00316039C28002A7C3B /* MetalTextFieldCell.h in Headers */,
+				7B0E4BA616686E7400CA1684 /* AtoZWebSnapperWindowController.h in Headers */,
+				7B0E4BA916687BEB00CA1684 /* AtoZWebSnapperGridViewController.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -364,7 +373,7 @@
 			name = "Paparazzi!";
 			productInstallPath = "$(HOME)/Applications";
 			productName = "webkit2png-GUI";
-			productReference = 8D1107320486CEB800E47090 /* Paparazzi!.app */;
+			productReference = 8D1107320486CEB800E47090 /* AtoZWebSnapper.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -375,7 +384,7 @@
 			attributes = {
 				LastUpgradeCheck = 0450;
 			};
-			buildConfigurationList = 7BDC24FA15CDED19000A2F2E /* Build configuration list for PBXProject "Paparazzi!" */;
+			buildConfigurationList = 7BDC24FA15CDED19000A2F2E /* Build configuration list for PBXProject "AtoZWebSnapper" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 1;
@@ -439,6 +448,7 @@
 				7B75CFFD16039C1F002A7C3B /* MetalTextField.m in Sources */,
 				7B75CFFE16039C1F002A7C3B /* MetalTextFieldCell.m in Sources */,
 				7B0E4BA4166863CA00CA1684 /* AtoZWebSnapperWindowController.m in Sources */,
+				7B0E4BAA16687BEB00CA1684 /* AtoZWebSnapperGridViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -525,6 +535,7 @@
 				COPY_PHASE_STRIP = NO;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_SEARCH_PATHS = "/Library/Frameworks/**";
 				FRAMEWORK_VERSION = A;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -538,6 +549,7 @@
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
@@ -545,8 +557,12 @@
 				INSTALL_PATH = "@rpath";
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_LDFLAGS = (
+					"-framework",
+					AtoZ,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx;
+				SDKROOT = "";
 				SKIP_INSTALL = YES;
 				WRAPPER_EXTENSION = framework;
 			};
@@ -566,20 +582,26 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_SEARCH_PATHS = "/Library/Frameworks/**";
 				FRAMEWORK_VERSION = A;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "AtoZWebSnapper/AtoZWebSnapper-Prefix.pch";
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = "AtoZWebSnapper/AtoZWebSnapper-Info.plist";
 				INSTALL_PATH = "@rpath";
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				OTHER_LDFLAGS = (
+					"-framework",
+					AtoZ,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx;
+				SDKROOT = "";
 				SKIP_INSTALL = YES;
 				WRAPPER_EXTENSION = framework;
 			};
@@ -599,20 +621,26 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_SEARCH_PATHS = "/Library/Frameworks/**";
 				FRAMEWORK_VERSION = A;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "AtoZWebSnapper/AtoZWebSnapper-Prefix.pch";
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = "AtoZWebSnapper/AtoZWebSnapper-Info.plist";
 				INSTALL_PATH = "@rpath";
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				OTHER_LDFLAGS = (
+					"-framework",
+					AtoZ,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx;
+				SDKROOT = "";
 				SKIP_INSTALL = YES;
 				WRAPPER_EXTENSION = framework;
 			};
@@ -662,7 +690,7 @@
 				LIBRARY_SEARCH_PATHS = "";
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
-				PRODUCT_NAME = "Paparazzi!";
+				PRODUCT_NAME = AtoZWebSnapper;
 				SDKROOT = macosx;
 				SECTORDER_FLAGS = "";
 				WARNING_CFLAGS = (
@@ -698,7 +726,7 @@
 				LIBRARY_SEARCH_PATHS = "";
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
-				PRODUCT_NAME = "Paparazzi!";
+				PRODUCT_NAME = AtoZWebSnapper;
 				SDKROOT = macosx;
 				SECTORDER_FLAGS = "";
 				WARNING_CFLAGS = (
@@ -733,7 +761,7 @@
 				LIBRARY_SEARCH_PATHS = "";
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
-				PRODUCT_NAME = "Paparazzi!";
+				PRODUCT_NAME = AtoZWebSnapper;
 				SDKROOT = macosx;
 				SECTORDER_FLAGS = "";
 				WARNING_CFLAGS = (
@@ -758,7 +786,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Default;
 		};
-		7BDC24FA15CDED19000A2F2E /* Build configuration list for PBXProject "Paparazzi!" */ = {
+		7BDC24FA15CDED19000A2F2E /* Build configuration list for PBXProject "AtoZWebSnapper" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				7BDC24F415CDED19000A2F2E /* Development */,
