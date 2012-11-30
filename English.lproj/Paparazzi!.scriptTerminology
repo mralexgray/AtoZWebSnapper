@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Commands</key>
+	<dict>
+		<key>GetURL</key>
+		<dict>
+			<key>Description</key>
+			<string>Opens and captures an URL.</string>
+			<key>Name</key>
+			<string>get URL</string>
+			<key>UnnamedArgument</key>
+			<dict>
+				<key>Description</key>
+				<string>The URL to capture.</string>
+			</dict>
+		</dict>
+		<key>OpenURL</key>
+		<dict>
+			<key>Description</key>
+			<string>Opens and captures an URL (Old IE-style).</string>
+			<key>Name</key>
+			<string>open URL</string>
+			<key>UnnamedArgument</key>
+			<dict>
+				<key>Description</key>
+				<string>The URL to capture.</string>
+			</dict>
+		</dict>
+	</dict>
+	<key>Description</key>
+	<string>Commands specific to Paparazzi!.</string>
+	<key>Name</key>
+	<string>Paparazzi! Suite</string>
+</dict>
+</plist>

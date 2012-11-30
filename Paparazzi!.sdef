@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE dictionary SYSTEM "file://localhost/System/Library/DTDs/sdef.dtd">
+<dictionary title="Dictionary">
+	<suite name="Paparazzi! Suite" code="Pzi!" description="Commands specific to Paparazzi!.">
+		<cocoa name="Paparazzi!"/>
+		<enumeration name="file type" code="ftyp" description="Image file type.">
+			<enumerator name="PNG" code="fPNG" description="PNG"/>
+			<enumerator name="TIFF" code="fTIF" description="TIFF"/>
+			<enumerator name="PDF" code="fPDF" description="PNG"/>
+			<enumerator name="JPEG" code="fJPG" description="JPEG"/>
+		</enumeration>
+		<command name="get URL" code="GURLGURL" description="Opens and captures an URL.">
+			<cocoa name="GetURL" class="GetURLCommand"/>
+			<direct-parameter name="direct parameter" description="The URL to capture." type="string"/>
+		</command>
+		<command name="open URL" code="WWW!OURL" description="Opens and captures an URL.">
+			<cocoa name="OpenURL" class="GetURLCommand"/>
+			<direct-parameter name="direct parameter" description="The URL to capture." type="string"/>
+		</command>
+		<command name="capture" code="Pzi!capt" description="Capture an URL.">
+			<cocoa name="Capture" class="GetURLCommand"/>
+			<direct-parameter name="direct parameter" description="The URL to capture." type="string"/>
+			<parameter name="height" code="chei" type="integer" optional="yes"/>
+			<parameter name="width" code="cwid" type="integer" optional="yes"/>
+			<parameter name="in background" code="cbak" type="boolean" optional="yes"/>
+			<result name="result" description="Was the capture successful? Returns false if a problem occurred." type="boolean"/>
+		</command>
+		<command name="save to file" code="Pzi!save">
+			<cocoa class="GetURLCommand"/>
+			<direct-parameter name="direct parameter" description="The file to save to." type="file"/>
+			<parameter name="format" code="ffmt" type="file type"/>
+			<result name="result" description="Whether the save was successful or not." type="boolean"/>
+		</command>
+	</suite>
+</dictionary>

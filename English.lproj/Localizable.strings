@@ -1,0 +1,13 @@
+LoadErrorTitle = "Error capturing %@";
+LoadErrorText = "The address you specified may be incorrect or the site may be having DNS issues.";
+
+CaptureURLFrom = "Capture URL From %@";
+CopyURLFrom = "Copy URL From %@"; // Not used yet
+
+Capture = "Capture";
+Cancel = "Cancel";
+
+MalformedURLTitle = "Malformed paparazzi: URL";
+MalformedURLText = "The URL “%@” is malformed and could not be loaded.";
+
+ClearMenu = "Clear Menu";
